@@ -1,10 +1,10 @@
 package com.hyfata.najoan.koreanpatch.util.minecraft;
 
+import com.hyfata.najoan.koreanpatch.mixin.accessor.GuiGraphicsAccessor;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.FormattedCharSequence;
@@ -22,13 +22,15 @@ public class RenderUtil {
     }
 
     public static void drawText(GuiGraphics context, FormattedCharSequence text, float x, float y) {
+        GuiGraphicsAccessor guiGraphicsAccessor = (GuiGraphicsAccessor) context;
         Font textRenderer = client.font;
         Matrix4f matrix = context.pose().last().pose();
-        MultiBufferSource vertexConsumers = context.bufferSource();
+        MultiBufferSource vertexConsumers = guiGraphicsAccessor.getBufferSource();
         textRenderer.drawInBatch(text, x, y, -1, false, matrix, vertexConsumers, Font.DisplayMode.NORMAL, 0, 15728880);
     }
 
     public static void fill(GuiGraphics context, float x1, float y1, float x2, float y2, int color) {
+        GuiGraphicsAccessor guiGraphicsAccessor = (GuiGraphicsAccessor) context;
         Matrix4f matrix = context.pose().last().pose();
         float i;
         if (x1 < x2) {
@@ -43,7 +45,7 @@ public class RenderUtil {
             y2 = i;
         }
 
-        VertexConsumer vertexConsumer = context.bufferSource().getBuffer(RenderType.gui());
+        VertexConsumer vertexConsumer = guiGraphicsAccessor.getBufferSource().getBuffer(RenderType.gui());
         vertexConsumer.addVertex(matrix, x1, y1, 0f).setColor(color);
         vertexConsumer.addVertex(matrix, x1, y2, 0f).setColor(color);
         vertexConsumer.addVertex(matrix, x2, y2, 0f).setColor(color);
