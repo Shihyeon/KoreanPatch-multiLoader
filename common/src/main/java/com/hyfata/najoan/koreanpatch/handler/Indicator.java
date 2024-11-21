@@ -13,7 +13,7 @@ public class Indicator {
 
     public static void showIndicator(GuiGraphics context, float x, float y) {
         int rgb = 0x000000;
-        int backgroundOpacity = 55 * 255 / 100; // N% * (0 to 255)/100
+        int backgroundOpacity = 50 * 255 / 100; // N% * (0 to 255)/100
         int backgroundColor = ((backgroundOpacity & 0xFF) << 24) | rgb; // ARGB
         int frameColor = LanguageUtil.isKorean() ? 0xffff0000 : 0xff00ff00; // ARGB
 
