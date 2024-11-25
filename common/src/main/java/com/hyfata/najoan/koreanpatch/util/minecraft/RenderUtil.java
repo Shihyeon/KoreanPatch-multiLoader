@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 
 public class RenderUtil {
@@ -64,5 +65,49 @@ public class RenderUtil {
         vertexConsumer.addVertex(matrix, x2, y1, 0f).setColor(color);
         context.flush();
         RenderSystem.disableBlend();
+    }
+
+    public static void drawQuarterCircleFrame(GuiGraphics context, float centerX, float centerY, float radius, int frameColor, float frameThickness, QuarterCircleDirection direction) {
+        float angleStep = Mth.PI / 2f / 36f;
+
+        for (float angle = 0f; angle <= Math.PI / 2; angle += angleStep) {
+            float projX = Mth.cos(angle);
+            float projY = Mth.sin(angle);
+
+            float startX;
+            float startY;
+
+            switch (direction) {
+                case TOP_LEFT -> {
+                    startX = centerX - radius * projX;
+                    startY = centerY - radius * projY;
+                }
+                case TOP_RIGHT -> {
+                    startX = centerX + radius * projX;
+                    startY = centerY - radius * projY;
+                }
+                case BOTTOM_LEFT -> {
+                    startX = centerX - radius * projX;
+                    startY = centerY + radius * projY;
+                }
+                case BOTTOM_RIGHT -> {
+                    startX = centerX + radius * projX;
+                    startY = centerY + radius * projY;
+                }
+                default -> throw new IllegalArgumentException("Invalid QuarterCircleDirection");
+            }
+
+            float endX = startX + frameThickness;
+            float endY = startY + frameThickness;
+
+            RenderUtil.fill(context, startX, startY, endX, endY, frameColor);
+        }
+    }
+
+    public enum QuarterCircleDirection {
+        TOP_LEFT,
+        TOP_RIGHT,
+        BOTTOM_LEFT,
+        BOTTOM_RIGHT
     }
 }
