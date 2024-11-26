@@ -68,40 +68,51 @@ public class RenderUtil {
     }
 
     public static void drawQuarterCircleFrame(GuiGraphics context, float centerX, float centerY, float radius, int frameColor, float frameThickness, QuarterCircleDirection direction) {
+        // radius = outerRadius
+        float innerRadius = radius - frameThickness;
+        if (innerRadius < 0) {
+            throw new IllegalArgumentException("Frame thickness cannot be greater than the outer radius.");
+        }
+
         float angleStep = Mth.PI / 2f / 36f;
 
-        for (float angle = 0f; angle <= Math.PI / 2; angle += angleStep) {
+        for (float angle = 0f; angle <= Mth.PI / 2; angle += angleStep) {
             float projX = Mth.cos(angle);
             float projY = Mth.sin(angle);
 
-            float startX;
-            float startY;
+            float[] innerPoint = calculateDirectionPoint(centerX, centerY, innerRadius, projX, projY, direction);
 
-            switch (direction) {
-                case TOP_LEFT -> {
-                    startX = centerX - radius * projX;
-                    startY = centerY - radius * projY;
-                }
-                case TOP_RIGHT -> {
-                    startX = centerX + radius * projX;
-                    startY = centerY - radius * projY;
-                }
-                case BOTTOM_LEFT -> {
-                    startX = centerX - radius * projX;
-                    startY = centerY + radius * projY;
-                }
-                case BOTTOM_RIGHT -> {
-                    startX = centerX + radius * projX;
-                    startY = centerY + radius * projY;
-                }
-                default -> throw new IllegalArgumentException("Invalid QuarterCircleDirection");
-            }
+            float nextAngle = angle + angleStep;
+            float nextProjX = Mth.cos(nextAngle);
+            float nextProjY = Mth.sin(nextAngle);
+            float[] outerPoint = calculateDirectionPoint(centerX, centerY, radius, nextProjX, nextProjY, direction);
 
-            float endX = startX + frameThickness;
-            float endY = startY + frameThickness;
-
-            RenderUtil.fill(context, startX, startY, endX, endY, frameColor);
+            RenderUtil.fill(context, innerPoint[0], innerPoint[1], outerPoint[0], outerPoint[1], frameColor);
         }
+    }
+
+    private static float[] calculateDirectionPoint(float centerX, float centerY, float radius, float projX, float projY, QuarterCircleDirection direction) {
+        float x, y;
+        switch (direction) {
+            case TOP_LEFT -> {
+                x = centerX - radius * projX;
+                y = centerY - radius * projY;
+            }
+            case TOP_RIGHT -> {
+                x = centerX + radius * projX;
+                y = centerY - radius * projY;
+            }
+            case BOTTOM_LEFT -> {
+                x = centerX - radius * projX;
+                y = centerY + radius * projY;
+            }
+            case BOTTOM_RIGHT -> {
+                x = centerX + radius * projX;
+                y = centerY + radius * projY;
+            }
+            default -> throw new IllegalArgumentException("Invalid QuarterCircleDirection");
+        }
+        return new float[]{x, y};
     }
 
     public enum QuarterCircleDirection {
