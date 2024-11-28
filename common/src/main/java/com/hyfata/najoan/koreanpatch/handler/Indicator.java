@@ -52,17 +52,18 @@ public class Indicator {
 
     private static void renderBox(GuiGraphics context, float x1, float y1, float x2, float y2, int frameColor, int backgroundColor) {
         float radius = 2f;
+        float adjustment = 0.4f;
 
         RenderUtil.fill(context, x1 + frame, y1 + frame, x2 - frame, y2 - frame, backgroundColor); // Background
 
-        RenderUtil.drawQuarterCircleFrame(context, x1 + radius, y1 + radius, radius, frameColor, frame, RenderUtil.QuarterCircleDirection.TOP_LEFT);
-        RenderUtil.drawQuarterCircleFrame(context, x2 - radius, y1 + radius, radius, frameColor, frame, RenderUtil.QuarterCircleDirection.TOP_RIGHT);
-        RenderUtil.drawQuarterCircleFrame(context, x1 + radius, y2 - radius, radius, frameColor, frame, RenderUtil.QuarterCircleDirection.BOTTOM_LEFT);
-        RenderUtil.drawQuarterCircleFrame(context, x2 - radius, y2 - radius, radius, frameColor, frame, RenderUtil.QuarterCircleDirection.BOTTOM_RIGHT);
+        RenderUtil.drawVertexCircleFrame(context, x1 + radius, y1 + radius, radius, frameColor, frame, RenderUtil.VertexDirection.TOP_LEFT);
+        RenderUtil.drawVertexCircleFrame(context, x2 - radius, y1 + radius, radius, frameColor, frame, RenderUtil.VertexDirection.TOP_RIGHT);
+        RenderUtil.drawVertexCircleFrame(context, x1 + radius, y2 - radius, radius, frameColor, frame, RenderUtil.VertexDirection.BOTTOM_LEFT);
+        RenderUtil.drawVertexCircleFrame(context, x2 - radius, y2 - radius, radius, frameColor, frame, RenderUtil.VertexDirection.BOTTOM_RIGHT);
 
-        RenderUtil.fill(context, x1 + radius - 0.4f, y1, x2 - radius + 0.4f, y1 + frame, frameColor); // frame with fixed axis-y1
-        RenderUtil.fill(context, x1 + radius - 0.4f, y2, x2 - radius + 0.4f, y2 - frame, frameColor); // frame with fixed axis-y2
-        RenderUtil.fill(context, x1, y1 + radius, x1 + frame, y2 - radius, frameColor); // frame with fixed axis-x1
-        RenderUtil.fill(context, x2, y1 + radius, x2 - frame, y2 - radius, frameColor); // frame with fixed axis-x2
+        RenderUtil.fill(context, x1 + radius - adjustment, y1, x2 - radius + adjustment, y1 + frame, frameColor); // frame with fixed axis-y1
+        RenderUtil.fill(context, x1 + radius - adjustment, y2, x2 - radius + adjustment, y2 - frame, frameColor); // frame with fixed axis-y2
+        RenderUtil.fill(context, x1, y1 + radius - adjustment, x1 + frame, y2 - radius + adjustment, frameColor); // frame with fixed axis-x1
+        RenderUtil.fill(context, x2, y1 + radius - adjustment, x2 - frame, y2 - radius + adjustment, frameColor); // frame with fixed axis-x2
     }
 }

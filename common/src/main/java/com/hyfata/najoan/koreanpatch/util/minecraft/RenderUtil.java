@@ -67,55 +67,88 @@ public class RenderUtil {
         RenderSystem.disableBlend();
     }
 
-    public static void drawQuarterCircleFrame(GuiGraphics context, float centerX, float centerY, float radius, int frameColor, float frameThickness, QuarterCircleDirection direction) {
+    public static void drawVertexCircleFrame(GuiGraphics context, float centerX, float centerY, float radius, int frameColor, float frameThickness, VertexDirection direction) {
         // radius = outerRadius
         float innerRadius = radius - frameThickness;
         if (innerRadius < 0) {
             throw new IllegalArgumentException("Frame thickness cannot be greater than the outer radius.");
         }
 
-        float angleStep = Mth.PI / 2f / 36f;
+        int steps = 18;
+        float angleStep = Mth.PI / 2f / steps;
 
-        for (float angle = 0f; angle <= Mth.PI / 2; angle += angleStep) {
-            float projX = Mth.cos(angle);
-            float projY = Mth.sin(angle);
+        float cos = 1.0f;
+        float sin = 0.0f;
+        float cosDelta = Mth.cos(angleStep);
+        float sinDelta = Mth.sin(angleStep);
 
-            float[] innerPoint = calculateDirectionPoint(centerX, centerY, innerRadius, projX, projY, direction);
+        for (int i = 0; i < steps; i++) {
+            float tempCos = cos;
+            cos = cos * cosDelta - sin * sinDelta;
+            sin = tempCos * sinDelta + sin * cosDelta;
 
-            float nextAngle = angle + angleStep;
-            float nextProjX = Mth.cos(nextAngle);
-            float nextProjY = Mth.sin(nextAngle);
-            float[] outerPoint = calculateDirectionPoint(centerX, centerY, radius, nextProjX, nextProjY, direction);
+            float[] innerPoint = calculateVertexDirectionPoint(centerX, centerY, innerRadius, cos, sin, direction);
+            float[] outerPoint = calculateVertexDirectionPoint(centerX, centerY, radius, cos, sin, direction);
 
             RenderUtil.fill(context, innerPoint[0], innerPoint[1], outerPoint[0], outerPoint[1], frameColor);
         }
     }
 
-    private static float[] calculateDirectionPoint(float centerX, float centerY, float radius, float projX, float projY, QuarterCircleDirection direction) {
+    public static void drawVertexSuperellipseFrame(GuiGraphics context, float centerX, float centerY, float radiusX, float radiusY, float exponent, int frameColor, float frameThickness, VertexDirection direction) {
+        int steps = 36;
+        float angleStep = Mth.PI / 2f / steps;
+
+        float correctedExponent = 2f / exponent;
+
+        float cos = 1.0f;
+        float sin = 0.0f;
+        float cosDelta = Mth.cos(angleStep);
+        float sinDelta = Mth.sin(angleStep);
+
+        for (int i = 0; i < steps; i++) {
+            float tempCos = cos;
+            cos = cos * cosDelta - sin * sinDelta;
+            sin = tempCos * sinDelta + sin * cosDelta;
+
+            float projX = (float) Math.pow(Mth.abs(cos), correctedExponent);
+            float projY = (float) Math.pow(Mth.abs(sin), correctedExponent);
+
+            float[] innerPoint = calculateVertexDirectionPoint(centerX, centerY, radiusX - frameThickness, radiusY - frameThickness, projX, projY, direction);
+            float[] outerPoint = calculateVertexDirectionPoint(centerX, centerY, radiusX, radiusY, projX, projY, direction);
+
+            RenderUtil.fill(context, innerPoint[0], innerPoint[1], outerPoint[0], outerPoint[1], frameColor);
+        }
+    }
+
+    private static float[] calculateVertexDirectionPoint(float centerX, float centerY, float radius, float projX, float projY, VertexDirection direction) {
+        return calculateVertexDirectionPoint(centerX, centerY, radius, radius, projX, projY, direction);
+    }
+
+    private static float[] calculateVertexDirectionPoint(float centerX, float centerY, float radiusX, float radiusY, float projX, float projY, VertexDirection direction) {
         float x, y;
         switch (direction) {
             case TOP_LEFT -> {
-                x = centerX - radius * projX;
-                y = centerY - radius * projY;
+                x = centerX - radiusX * projX;
+                y = centerY - radiusY * projY;
             }
             case TOP_RIGHT -> {
-                x = centerX + radius * projX;
-                y = centerY - radius * projY;
+                x = centerX + radiusX * projX;
+                y = centerY - radiusY * projY;
             }
             case BOTTOM_LEFT -> {
-                x = centerX - radius * projX;
-                y = centerY + radius * projY;
+                x = centerX - radiusX * projX;
+                y = centerY + radiusY * projY;
             }
             case BOTTOM_RIGHT -> {
-                x = centerX + radius * projX;
-                y = centerY + radius * projY;
+                x = centerX + radiusX * projX;
+                y = centerY + radiusY * projY;
             }
-            default -> throw new IllegalArgumentException("Invalid QuarterCircleDirection");
+            default -> throw new IllegalArgumentException("Invalid VertexDirection");
         }
         return new float[]{x, y};
     }
 
-    public enum QuarterCircleDirection {
+    public enum VertexDirection {
         TOP_LEFT,
         TOP_RIGHT,
         BOTTOM_LEFT,
